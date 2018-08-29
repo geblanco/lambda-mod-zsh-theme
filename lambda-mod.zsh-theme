@@ -10,14 +10,45 @@ function check_git_prompt_info() {
     if git rev-parse --git-dir > /dev/null 2>&1; then
         if [[ -z $(git_prompt_info 2> /dev/null) ]]; then
             echo "%{$fg[blue]%}detached-head%{$reset_color%}) $(git_prompt_status)
-%{$fg[yellow]%}→ "
+$(print_end)"
         else
             echo "$(git_prompt_info 2> /dev/null) $(git_prompt_status)
-%{$fg_bold[cyan]%}→ "
+$(print_end)"
         fi
     else
-        echo "%{$fg_bold[cyan]%}→ "
+      echo "$(print_end)"
     fi
+}
+
+function check_virtual_env_prompt_info() {
+  if [[ -n $VIRTUAL_ENV ]]; then
+    echo "
+%{$fg_bold[yellow]%}$(virtualenv_prompt_info) $(print_end)"
+  else
+    echo ""
+  fi
+}
+
+function print_end() {
+  echo "%{$fg_bold[cyan]%}→ "
+}
+
+function get_left_prompt() {
+  if [[ -n $VIRTUAL_ENV ]]; then
+     echo "\n$LAMBDA\
+ %{$fg_bold[$USERCOLOR]%}%n\
+%{$fg_bold[magenta]%}%(1j. %j.)\
+ %{$fg_bold[magenta]%}[%3~]\
+ $(check_virtual_env_prompt_info)\
+%{$reset_color%}"
+  else
+    echo "\n$LAMBDA\
+ %{$fg_bold[$USERCOLOR]%}%n %{$fg_bold[green]%}[%m]\
+%{$fg_bold[magenta]%}%(1j. %j.)\
+ %{$fg_bold[magenta]%}[%3~]\
+ $(check_git_prompt_info)\
+%{$reset_color%}"
+  fi
 }
 
 function get_right_prompt() {
@@ -28,12 +59,7 @@ function get_right_prompt() {
     fi
 }
 
-PROMPT=$'\n'$LAMBDA'\
- %{$fg_bold[$USERCOLOR]%}%n %{$fg_bold[green]%}[%m]\
-%{$fg_bold[magenta]%}%(1j. %j.)\
- %{$fg_no_bold[magenta]%}[%3~]\
- $(check_git_prompt_info)\
-%{$reset_color%}'
+PROMPT='$(get_left_prompt)'
 
 RPROMPT='$(get_right_prompt)'
 
@@ -53,7 +79,6 @@ ZSH_THEME_GIT_PROMPT_UNTRACKED="%{$fg_bold[cyan]%}?"
 
 # Format for git_prompt_ahead()
 ZSH_THEME_GIT_PROMPT_AHEAD=" %{$fg_bold[white]%}^"
-
 
 # Format for git_prompt_long_sha() and git_prompt_short_sha()
 ZSH_THEME_GIT_PROMPT_SHA_BEFORE=" %{$fg_bold[white]%}[%{$fg_bold[blue]%}"
