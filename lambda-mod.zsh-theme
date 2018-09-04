@@ -34,18 +34,17 @@ function print_end() {
 }
 
 function get_left_prompt() {
+  local jobs_pwd="%{$fg_bold[cyan]%}%(1j.( %j ). )%{$fg_bold[magenta]%}[%3~]"
   if [[ -n $VIRTUAL_ENV ]]; then
      echo "\n$LAMBDA\
  %{$fg_bold[$USERCOLOR]%}%n\
-%{$fg_bold[cyan]%}%(1j.( %j ). )\
-%{$fg_bold[magenta]%}[%3~]\
+$jobs_pwd\
  $(check_virtual_env_prompt_info)\
 %{$reset_color%}"
   else
     echo "\n$LAMBDA\
  %{$fg_bold[$USERCOLOR]%}%n %{$fg_bold[green]%}[%m]\
-%{$fg_bold[cyan]%}%(1j.( %j ). )\
-%{$fg_bold[magenta]%}[%3~]\
+$jobs_pwd\
  $(check_git_prompt_info)\
 %{$reset_color%}"
   fi
