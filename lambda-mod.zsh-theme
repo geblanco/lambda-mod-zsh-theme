@@ -7,17 +7,17 @@ if [[ "$USER" == "root" ]]; then USERCOLOR="red"; else USERCOLOR="yellow"; fi
 # return anything in this case. So wrap it in another function and check
 # for an empty string.
 function check_git_prompt_info() {
-    if git rev-parse --git-dir > /dev/null 2>&1; then
-        if [[ -z $(git_prompt_info 2> /dev/null) ]]; then
-            echo "%{$fg[blue]%}detached-head%{$reset_color%}) $(git_prompt_status)
+  if git rev-parse --git-dir > /dev/null 2>&1; then
+    if [[ -z $(git_prompt_info 2> /dev/null) ]]; then
+      echo "%{$fg[blue]%}detached-head%{$reset_color%}) $(git_prompt_status)
 $(print_end)"
-        else
-            echo "$(git_prompt_info 2> /dev/null) $(git_prompt_status)
-$(print_end)"
-        fi
     else
-      echo "$(print_end)"
+      echo "$(git_prompt_info 2> /dev/null) $(git_prompt_status)
+$(print_end)"
     fi
+  else
+    echo "$(print_end)"
+  fi
 }
 
 function check_virtual_env_prompt_info() {
@@ -34,28 +34,39 @@ function print_end() {
 }
 
 function get_left_prompt() {
-  local jobs_pwd="%{$fg_bold[cyan]%}%(1j.( %j ). )%{$fg_bold[magenta]%}[%3~]"
-  if [[ -n $VIRTUAL_ENV ]]; then
-     echo "\n$LAMBDA\
+  if [[ ! -z "$SSH_CLIENT" ]]; then
+    # ssh session, different prompt (robbyrussel)
+    local ret_status="%(?:%{$fg_bold[green]%}➜ :%{$fg_bold[red]%}➜ )"
+    ret_status+="%{$fg[cyan]%}%c%{$reset_color%} $(git_prompt_info) "
+    if [[ -n $VIRTUAL_ENV ]]; then
+      ret_status+="$(check_virtual_env_prompt_info)"
+    fi
+    echo "
+$ret_status"
+  else
+    local jobs_pwd="%{$fg_bold[cyan]%}%(1j.( %j ). )%{$fg_bold[magenta]%}[%3~]"
+    if [[ -n $VIRTUAL_ENV ]]; then
+       echo "\n$LAMBDA\
  %{$fg_bold[$USERCOLOR]%}%n\
 $jobs_pwd\
  $(check_virtual_env_prompt_info)\
 %{$reset_color%}"
-  else
-    echo "\n$LAMBDA\
+    else
+      echo "\n$LAMBDA\
  %{$fg_bold[$USERCOLOR]%}%n %{$fg_bold[green]%}[%m]\
 $jobs_pwd\
  $(check_git_prompt_info)\
 %{$reset_color%}"
+    fi
   fi
 }
 
 function get_right_prompt() {
-    if git rev-parse --git-dir > /dev/null 2>&1; then
-        echo -n "$(git_prompt_short_sha)%{$reset_color%}"
-    else
-        echo -n "%{$reset_color%}"
-    fi
+  if git rev-parse --git-dir > /dev/null 2>&1; then
+    echo -n "$(git_prompt_short_sha)%{$reset_color%}"
+  else
+    echo -n "%{$reset_color%}"
+  fi
 }
 
 PROMPT='$(get_left_prompt)'
