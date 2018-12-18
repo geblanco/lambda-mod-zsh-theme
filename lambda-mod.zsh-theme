@@ -38,6 +38,7 @@ function get_left_prompt() {
     local jobs_pwd="%{$fg_bold[cyan]%}%(1j.( %j ). )%{$fg_bold[magenta]%}"
     # ssh session, different prompt (robbyrussel)
     local ret_status="%(?:%{$fg_bold[green]%}➜ :%{$fg_bold[red]%}➜ )"
+    ret_status+="%{$fg_bold[green]%}[%m]"
     ret_status+=$jobs_pwd
     ret_status+="%{$fg[cyan]%}%c%{$reset_color%} $(git_prompt_info) "
     if [[ -n $VIRTUAL_ENV ]]; then
