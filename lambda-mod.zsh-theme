@@ -50,13 +50,17 @@ function print_jobs() {
 
 function print_cwd() {
   if [[ "$ZSH_THEME_PRINT_CWD" == true ]]; then
-    echo -n " %{$fg_bold[magenta]%}[%3~]"
+    if [[ ! -z "$SSH_CLIENT" ]]; then
+      echo " %{$fg[cyan]%}%c%{$reset_color%}"
+    else
+      echo -n " %{$fg_bold[magenta]%}[%3~]"
+    fi
   fi
 }
 
 function get_left_prompt() {
   if [[ ! -z "$SSH_CLIENT" ]]; then
-    echo "\n$XI %{$fg[cyan]%}%c%{$reset_color%}$(print_virtual_env_info) $(check_git_prompt_info)%{$reset_color%}"
+    echo "\n$XI$(print_jobs)$(print_cwd)$(print_virtual_env_info) $(check_git_prompt_info)%{$reset_color%}"
   else
     echo "\n$LAMBDA$(print_username)$(print_machine)$(print_jobs)$(print_cwd)$(print_virtual_env_info) $(check_git_prompt_info)%{$reset_color%}"
   fi
@@ -100,3 +104,6 @@ ZSH_THEME_GIT_PROMPT_AHEAD=" %{$fg_bold[white]%}^"
 # Format for git_prompt_long_sha() and git_prompt_short_sha()
 ZSH_THEME_GIT_PROMPT_SHA_BEFORE=" %{$fg_bold[white]%}[%{$fg_bold[blue]%}"
 ZSH_THEME_GIT_PROMPT_SHA_AFTER="%{$fg_bold[white]%}]"
+
+
+
