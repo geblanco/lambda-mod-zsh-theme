@@ -1,6 +1,7 @@
 #!/usr/bin/env zsh
 
 local LAMBDA="%(?,%{$fg_bold[green]%}λ,%{$fg_bold[red]%}λ)"
+local XI="%(?,%{$fg_bold[green]%}Ξ,%{$fg_bold[red]%}Ξ)"
 if [[ "$USER" == "root" ]]; then USERCOLOR="red"; else USERCOLOR="yellow"; fi
 
 # Git sometimes goes into a detached head state. git_prompt_info doesn't
@@ -9,23 +10,12 @@ if [[ "$USER" == "root" ]]; then USERCOLOR="red"; else USERCOLOR="yellow"; fi
 function check_git_prompt_info() {
   if git rev-parse --git-dir > /dev/null 2>&1; then
     if [[ -z $(git_prompt_info 2> /dev/null) ]]; then
-      echo "%{$fg[blue]%}detached-head%{$reset_color%}) $(git_prompt_status)
-$(print_end)"
+      echo "%{$fg[blue]%}detached-head%{$reset_color%}) $(git_prompt_status)\n$(print_end)"
     else
-      echo "$(git_prompt_info 2> /dev/null) $(git_prompt_status)
-$(print_end)"
+      echo "$(git_prompt_info 2> /dev/null) $(git_prompt_status)\n$(print_end)"
     fi
   else
     echo "$(print_end)"
-  fi
-}
-
-function check_virtual_env_prompt_info() {
-  if [[ -n $VIRTUAL_ENV ]]; then
-    echo "
-%{$fg_bold[yellow]%}$(virtualenv_prompt_info) $(print_end)"
-  else
-    echo ""
   fi
 }
 
@@ -33,31 +23,46 @@ function print_end() {
   echo "%{$fg_bold[cyan]%}→ "
 }
 
+function print_virtual_env_info() {
+  if [[ -n $VIRTUAL_ENV ]]; then
+    echo " %{$fg_bold[yellow]%}$(virtualenv_prompt_info)"
+  fi
+}
+
+function print_username() {
+  if [[ "$ZSH_THEME_PRINT_USERNAME" == true ]]; then
+    echo -n " %{$fg_bold[$USERCOLOR]%}%n"
+  fi
+}
+
+function print_machine() {
+  if [[ "$ZSH_THEME_PRINT_MACHINE" == true ]]; then
+    echo -n " %{$fg_bold[green]%}[%m]"
+  fi
+}
+
+function print_jobs() {
+  if [[ "$ZSH_THEME_PRINT_JOBS" == true ]]; then
+    local jobs_pwd="%{$fg_bold[cyan]%}%(1j. ( %j ).)"
+    echo -n "$jobs_pwd"
+  fi
+}
+
+function print_cwd() {
+  if [[ "$ZSH_THEME_PRINT_CWD" == true ]]; then
+    echo -n " %{$fg_bold[magenta]%}[%3~]"
+  fi
+}
+
 function get_left_prompt() {
   if [[ ! -z "$SSH_CLIENT" ]]; then
     # ssh session, different prompt (robbyrussel)
     local ret_status="%(?:%{$fg_bold[green]%}➜ :%{$fg_bold[red]%}➜ )"
-    ret_status+="%{$fg[cyan]%}%c%{$reset_color%} $(git_prompt_info) "
-    if [[ -n $VIRTUAL_ENV ]]; then
-      ret_status+="$(check_virtual_env_prompt_info)"
-    fi
-    echo "
-$ret_status"
+    ret_status+="%{$fg[cyan]%}%c%{$reset_color%}$(print_virtual_env_info) $(check_git_prompt_info)%{$reset_color%}"
+    # echo "\n$ret_status"
+    echo "\n$XI %{$fg[cyan]%}%c%{$reset_color%}$(print_virtual_env_info) $(check_git_prompt_info)%{$reset_color%}"
   else
-    local jobs_pwd="%{$fg_bold[cyan]%}%(1j.( %j ). )%{$fg_bold[magenta]%}[%3~]"
-    if [[ -n $VIRTUAL_ENV ]]; then
-       echo "\n$LAMBDA\
- %{$fg_bold[$USERCOLOR]%}%n\
-$jobs_pwd\
- $(check_virtual_env_prompt_info)\
-%{$reset_color%}"
-    else
-      echo "\n$LAMBDA\
- %{$fg_bold[$USERCOLOR]%}%n %{$fg_bold[green]%}[%m]\
-$jobs_pwd\
- $(check_git_prompt_info)\
-%{$reset_color%}"
-    fi
+    echo "\n$LAMBDA$(print_username)$(print_machine)$(print_jobs)$(print_cwd)$(print_virtual_env_info) $(check_git_prompt_info)%{$reset_color%}"
   fi
 }
 
@@ -71,7 +76,13 @@ function get_right_prompt() {
 
 PROMPT='$(get_left_prompt)'
 
-RPROMPT='$(get_right_prompt)'
+# RPROMPT='$(get_right_prompt)'
+
+# Theme config
+ZSH_THEME_PRINT_USERNAME=false
+ZSH_THEME_PRINT_MACHINE=false
+ZSH_THEME_PRINT_JOBS=true
+ZSH_THEME_PRINT_CWD=true
 
 # Format for git_prompt_info()
 ZSH_THEME_GIT_PROMPT_PREFIX="at %{$fg[blue]%} "
