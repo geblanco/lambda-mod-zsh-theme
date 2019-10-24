@@ -56,10 +56,6 @@ function print_cwd() {
 
 function get_left_prompt() {
   if [[ ! -z "$SSH_CLIENT" ]]; then
-    # ssh session, different prompt (robbyrussel)
-    local ret_status="%(?:%{$fg_bold[green]%}➜ :%{$fg_bold[red]%}➜ )"
-    ret_status+="%{$fg[cyan]%}%c%{$reset_color%}$(print_virtual_env_info) $(check_git_prompt_info)%{$reset_color%}"
-    # echo "\n$ret_status"
     echo "\n$XI %{$fg[cyan]%}%c%{$reset_color%}$(print_virtual_env_info) $(check_git_prompt_info)%{$reset_color%}"
   else
     echo "\n$LAMBDA$(print_username)$(print_machine)$(print_jobs)$(print_cwd)$(print_virtual_env_info) $(check_git_prompt_info)%{$reset_color%}"
