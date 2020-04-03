@@ -24,8 +24,11 @@ function print_end() {
 }
 
 function print_virtual_env_info() {
+  # this works for virtualenv and pipenv, but not for conda
   if [[ -n $VIRTUAL_ENV ]]; then
-    echo " %{$fg_bold[yellow]%}$(virtualenv_prompt_info)"
+    echo " %{$fg_bold[yellow]%}$(virtualenv_prompt_info | tr '[' '(' | tr ']' ')')"
+  elif [[ -n $CONDA_PREFIX ]]; then
+    echo " %{$fg_bold[yellow]%}($(basename $CONDA_PREFIX | tr -d '[:space:]'))"
   fi
 }
 
