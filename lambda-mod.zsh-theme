@@ -24,19 +24,26 @@ function print_end() {
 }
 
 function print_virtual_env_info() {
+  # this works for virtualenv and pipenv, but not for conda
   if [[ -n $VIRTUAL_ENV ]]; then
-    echo " %{$fg_bold[yellow]%}$(virtualenv_prompt_info)"
+    echo " %{$fg_bold[yellow]%}$(virtualenv_prompt_info | tr '[' '(' | tr ']' ')')"
+  elif [[ -n $CONDA_PREFIX ]]; then
+    echo " %{$fg_bold[yellow]%}($(basename $CONDA_PREFIX | tr -d '[:space:]'))"
   fi
 }
 
 function print_username() {
-  if [[ "$ZSH_THEME_PRINT_USERNAME" == true ]]; then
+  if [[ ! -z "$SSH_CLIENT" && "$ZSH_THEME_PRINT_USERNAME_REMOTE" == true ]]; then
+    echo -n " %{$fg_bold[$USERCOLOR]%}%n"
+  elif [[ -z "$SSH_CLIENT" && "$ZSH_THEME_PRINT_USERNAME" == true ]]; then
     echo -n " %{$fg_bold[$USERCOLOR]%}%n"
   fi
 }
 
 function print_machine() {
-  if [[ "$ZSH_THEME_PRINT_MACHINE" == true ]]; then
+  if [[ ! -z "$SSH_CLIENT" && "$ZSH_THEME_PRINT_MACHINE_REMOTE" == true ]]; then
+    echo -n " %{$fg_bold[green]%}[%m]"
+  elif [[ -z "$SSH_CLIENT" && "$ZSH_THEME_PRINT_MACHINE" == true ]]; then
     echo -n " %{$fg_bold[green]%}[%m]"
   fi
 }
@@ -59,11 +66,11 @@ function print_cwd() {
 }
 
 function get_left_prompt() {
+  local symbol=$LAMBDA
   if [[ ! -z "$SSH_CLIENT" ]]; then
-    echo "\n$XI$(print_jobs)$(print_cwd)$(print_virtual_env_info) $(check_git_prompt_info)%{$reset_color%}"
-  else
-    echo "\n$LAMBDA$(print_username)$(print_machine)$(print_jobs)$(print_cwd)$(print_virtual_env_info) $(check_git_prompt_info)%{$reset_color%}"
+    local symbol=$XI
   fi
+  echo "\n$symbol$(print_username)$(print_machine)$(print_jobs)$(print_cwd)$(print_virtual_env_info) $(check_git_prompt_info)%{$reset_color%}"
 }
 
 function get_right_prompt() {
@@ -79,7 +86,9 @@ PROMPT='$(get_left_prompt)'
 # RPROMPT='$(get_right_prompt)'
 
 # Theme config
+ZSH_THEME_PRINT_USERNAME_REMOTE=false
 ZSH_THEME_PRINT_USERNAME=false
+ZSH_THEME_PRINT_MACHINE_REMOTE=true
 ZSH_THEME_PRINT_MACHINE=false
 ZSH_THEME_PRINT_JOBS=true
 ZSH_THEME_PRINT_CWD=true
@@ -104,6 +113,5 @@ ZSH_THEME_GIT_PROMPT_AHEAD=" %{$fg_bold[white]%}^"
 # Format for git_prompt_long_sha() and git_prompt_short_sha()
 ZSH_THEME_GIT_PROMPT_SHA_BEFORE=" %{$fg_bold[white]%}[%{$fg_bold[blue]%}"
 ZSH_THEME_GIT_PROMPT_SHA_AFTER="%{$fg_bold[white]%}]"
-
 
 
