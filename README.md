@@ -1,9 +1,9 @@
-# Lambda (Mod) ZSH Theme
+# Modified themes
 
-A ZSH theme optimized for people who use:
-- Git
-- Unicode-compatible fonts and terminals
+- Lambda ZSH Theme (taken from [here](https://github.com/cdimascio/lambda-zsh-theme))
+- Af-magic ZSH Theme (taken from [here](https://github.com/ohmyzsh/ohmyzsh/blob/master/themes/af-magic.zsh-theme))
 
----
-
-![Screenshot](https://raw.githubusercontent.com/halfo/lambda-mod-zsh-theme/master/screenshot.png)
+Install all the themes with:
+```bash
+make install
+```
